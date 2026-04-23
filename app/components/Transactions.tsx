@@ -154,7 +154,7 @@ export default function Transactions({ data, setData }: any) {
                 {f.type === 'select' ? (
                   <select value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                     style={{ width:'100%', background:'#f2f2f2', border:'none', borderRadius:10, padding:'12px 14px', fontSize:15, fontFamily:'DM Sans, sans-serif', outline:'none' }}>
-                    {f.options!.map(o => <option key={o}>{o}</option>)}
+                    {f.options!.map((o: string) => <option key={o}>{o}</option>)}
                   </select>
                 ) : (
                   <input type={f.type} value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
