@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { saveCategories } from '../sheets'
 
 export default function Categories({ data, setData }: any) {
   const [detail, setDetail] = useState<any>(null)
@@ -27,27 +28,27 @@ export default function Categories({ data, setData }: any) {
     setShowAdd(true)
   }
 
-  function save() {
+  async function save() {
     if (editing) {
-      setData((d: any) => ({
-        ...d,
-        categories: d.categories.map((c: any) =>
-          c.id === editing.id ? { ...c, ...form, budget: parseFloat(form.budget as any) || 0 } : c
-        )
-      }))
+      const updated = data.categories.map((c: any) =>
+        c.id === editing.id ? { ...c, ...form, budget: parseFloat(form.budget as any) || 0 } : c
+      )
+      setData((d: any) => ({ ...d, categories: updated }))
+      await saveCategories(updated)
     } else {
-      setData((d: any) => ({
-        ...d,
-        categories: [...d.categories, {
-          id: Date.now(), ...form, budget: parseFloat(form.budget as any) || 0
-        }]
-      }))
+      const updated = [...data.categories, {
+        id: Date.now(), ...form, budget: parseFloat(form.budget as any) || 0
+      }]
+      setData((d: any) => ({ ...d, categories: updated }))
+      await saveCategories(updated)
     }
     setShowAdd(false)
   }
 
-  function del(id: number) {
-    setData((d: any) => ({ ...d, categories: d.categories.filter((c: any) => c.id !== id) }))
+  async function del(id: number) {
+    const updated = data.categories.filter((c: any) => c.id !== id)
+    setData((d: any) => ({ ...d, categories: updated }))
+    await saveCategories(updated)
     setDetail(null)
   }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { saveEpargnes } from '../sheets'
 
 export default function Epargnes({ data, setData }: any) {
   const [showAdd, setShowAdd] = useState(false)
@@ -19,35 +20,35 @@ export default function Epargnes({ data, setData }: any) {
     setShowAdd(true)
   }
 
-  function save() {
+  async function save() {
     if (editing) {
-      setData((d: any) => ({
-        ...d,
-        epargnes: d.epargnes.map((e: any) =>
-          e.id === editing.id ? {
-            ...e,
-            nom: form.nom,
-            objectif: parseFloat(form.objectif as any) || 0,
-            epargne: parseFloat(form.epargne as any) || 0,
-          } : e
-        )
-      }))
-    } else {
-      setData((d: any) => ({
-        ...d,
-        epargnes: [...d.epargnes, {
-          id: Date.now(),
-          nom: form.nom || 'Nouvelle épargne',
+      const updated = data.epargnes.map((e: any) =>
+        e.id === editing.id ? {
+          ...e,
+          nom: form.nom,
           objectif: parseFloat(form.objectif as any) || 0,
           epargne: parseFloat(form.epargne as any) || 0,
-        }]
-      }))
+        } : e
+      )
+      setData((d: any) => ({ ...d, epargnes: updated }))
+      await saveEpargnes(updated)
+    } else {
+      const updated = [...data.epargnes, {
+        id: Date.now(),
+        nom: form.nom || 'Nouvelle épargne',
+        objectif: parseFloat(form.objectif as any) || 0,
+        epargne: parseFloat(form.epargne as any) || 0,
+      }]
+      setData((d: any) => ({ ...d, epargnes: updated }))
+      await saveEpargnes(updated)
     }
     setShowAdd(false)
   }
 
-  function del(id: number) {
-    setData((d: any) => ({ ...d, epargnes: d.epargnes.filter((e: any) => e.id !== id) }))
+  async function del(id: number) {
+    const updated = data.epargnes.filter((e: any) => e.id !== id)
+    setData((d: any) => ({ ...d, epargnes: updated }))
+    await saveEpargnes(updated)
   }
 
   return (

@@ -1,15 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Transactions from './components/Transactions'
 import Categories from './components/Categories'
 import Revenus from './components/Revenus'
 import Epargnes from './components/Epargnes'
-import { data } from './data'
+import { loadData } from './sheets'
+import { data as defaultData } from './data'
 
 export default function Home() {
   const [tab, setTab] = useState('transactions')
-  const [appData, setAppData] = useState(data)
+  const [appData, setAppData] = useState(defaultData)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+      .then(d => setAppData(d))
+      .catch(e => console.error('Erreur chargement:', e))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', flexDirection:'column', gap:16 }}>
+      <div style={{ fontSize:32 }}>💰</div>
+      <div style={{ fontSize:16, color:'var(--text-sub)', fontFamily:'DM Sans, sans-serif' }}>Chargement...</div>
+    </div>
+  )
 
   return (
     <div style={{

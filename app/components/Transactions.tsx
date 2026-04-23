@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MOIS } from '../data'
+import { saveTransactions } from '../sheets'
 
 export default function Transactions({ data, setData }: any) {
   const [search, setSearch] = useState('')
@@ -36,27 +37,27 @@ export default function Transactions({ data, setData }: any) {
     setShowAdd(true)
   }
 
-  function save() {
+  async function save() {
     if (editing) {
-      setData((d: any) => ({
-        ...d,
-        transactions: d.transactions.map((t: any) =>
-          t.id === editing.id ? { ...t, ...form, montant: parseFloat(form.montant as any) || 0 } : t
-        )
-      }))
+      const updated = appData.transactions.map((t: any) =>
+        t.id === editing.id ? { ...t, ...form, montant: parseFloat(form.montant as any) || 0 } : t
+      )
+      setData((d: any) => ({ ...d, transactions: updated }))
+      await saveTransactions(updated)
     } else {
-      setData((d: any) => ({
-        ...d,
-        transactions: [...d.transactions, {
-          id: Date.now(), ...form, montant: parseFloat(form.montant as any) || 0
-        }]
-      }))
+      const updated = [...data.transactions, {
+        id: Date.now(), ...form, montant: parseFloat(form.montant as any) || 0
+      }]
+      setData((d: any) => ({ ...d, transactions: updated }))
+      await saveTransactions(updated)
     }
     setShowAdd(false)
   }
 
-  function del(id: number) {
-    setData((d: any) => ({ ...d, transactions: d.transactions.filter((t: any) => t.id !== id) }))
+  async function del(id: number) {
+    const updated = data.transactions.filter((t: any) => t.id !== id)
+    setData((d: any) => ({ ...d, transactions: updated }))
+    await saveTransactions(updated)
     setDetail(null)
   }
 
