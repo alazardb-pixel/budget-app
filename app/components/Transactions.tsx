@@ -101,7 +101,7 @@ export default function Transactions({ data, setData }: any) {
       {/* TOAST */}
       {toast && (
         <div style={{
-          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
+          position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
           background: '#1a1a1a', color: 'white', padding: '12px 20px', borderRadius: 12,
           fontSize: 14, fontWeight: 500, zIndex: 999, whiteSpace: 'nowrap',
           boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
@@ -112,7 +112,7 @@ export default function Transactions({ data, setData }: any) {
       )}
 
       <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
       `}</style>
 
       {/* HEADER */}
