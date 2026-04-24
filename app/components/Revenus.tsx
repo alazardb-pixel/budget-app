@@ -33,9 +33,23 @@ export default function Revenus({ data, setData }: any) {
   const allTotauxBaptiste = MOIS.map(m => getTotalBaptiste(data.revenus[m]))
   const allTotauxLucile = MOIS.map(m => getTotalLucile(data.revenus[m]))
   const maxVal = Math.max(...allTotauxBaptiste, ...allTotauxLucile, 1)
+
+  // Moyennes (uniquement mois avec données)
+  const moisAvecDonnees = MOIS.filter(m => getTotalBaptiste(data.revenus[m]) + getTotalLucile(data.revenus[m]) > 0)
+  const moyBaptiste = moisAvecDonnees.length > 0
+    ? moisAvecDonnees.reduce((s, m) => s + getTotalBaptiste(data.revenus[m]), 0) / moisAvecDonnees.length
+    : 0
+  const moyLucile = moisAvecDonnees.length > 0
+    ? moisAvecDonnees.reduce((s, m) => s + getTotalLucile(data.revenus[m]), 0) / moisAvecDonnees.length
+    : 0
+
   const totalAnnuel = MOIS.reduce((s, m) => s + getTotalBaptiste(data.revenus[m]) + getTotalLucile(data.revenus[m]), 0)
 
   const moisShort = ['J', 'F', 'Ma', 'Av', 'Mai', 'Jn', 'Jl', 'A', 'S', 'O', 'N', 'D']
+
+  // Échelle axe Y : 3 valeurs
+  const yMax = Math.ceil(maxVal / 1000) * 1000
+  const yMid = Math.round(yMax / 2)
 
   function openEdit() {
     setForm({
@@ -79,7 +93,7 @@ export default function Revenus({ data, setData }: any) {
         </div>
       )}
       <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
       `}</style>
 
       {/* HEADER */}
@@ -98,7 +112,7 @@ export default function Revenus({ data, setData }: any) {
         </select>
       </div>
 
-      {/* CARTE RÉSUMÉ DU MOIS */}
+      {/* CARTE RÉSUMÉ */}
       <div style={{ margin: '0 20px 12px', background: 'white', borderRadius: 14, overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
           <span style={{ fontSize: 15, fontWeight: 700 }}>Total couple</span>
@@ -132,7 +146,7 @@ export default function Revenus({ data, setData }: any) {
           </div>
         </div>
         <div style={{ padding: '12px 18px', borderTop: '1px solid var(--border)' }}>
-          <button onClick={openEdit} style={{ width: '100%', padding: '11px', background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+          <button onClick={openEdit} style={{ width: '100%', padding: 11, background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
             ✏️ Modifier les revenus de {mois}
           </button>
         </div>
@@ -140,34 +154,60 @@ export default function Revenus({ data, setData }: any) {
 
       {/* GRAPHIQUE */}
       <div style={{ background: 'white', borderRadius: 14, margin: '0 20px 12px', padding: 16 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Évolution mensuelle</div>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 2 }}>Évolution mensuelle</div>
         <div style={{ fontSize: 12, color: 'var(--text-sub)', marginBottom: 12 }}>Revenus totaux par mois</div>
+
+        {/* Légende + moyennes */}
         <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
-          {[['var(--baptiste)', 'Baptiste'], ['var(--lucile)', 'Lucile']].map(([color, name]) => (
-            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-sub)' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} />
-              {name}
+          {[
+            { color: 'var(--baptiste)', name: 'Baptiste', moy: moyBaptiste },
+            { color: 'var(--lucile)', name: 'Lucile', moy: moyLucile },
+          ].map(({ color, name, moy }) => (
+            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
+              <span style={{ color: 'var(--text-sub)' }}>{name}</span>
+              {moy > 0 && <span style={{ color, fontWeight: 600 }}>~{Math.round(moy).toLocaleString('fr-FR')} €</span>}
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 90 }}>
-          {MOIS.map((m, i) => {
-            const hB = Math.round((allTotauxBaptiste[i] / maxVal) * 80)
-            const hL = Math.round((allTotauxLucile[i] / maxVal) * 80)
-            const isSelected = m === mois
-            return (
-              <div key={m} onClick={() => setMois(m)} style={{ flex: 1, display: 'flex', gap: 2, alignItems: 'flex-end', cursor: 'pointer', opacity: isSelected ? 1 : 0.6 }}>
-                <div style={{ flex: 1, height: hB, background: 'var(--baptiste)', borderRadius: '3px 3px 0 0', minHeight: hB > 0 ? 3 : 0, transition: 'height 0.3s' }} />
-                <div style={{ flex: 1, height: hL, background: 'var(--lucile)', borderRadius: '3px 3px 0 0', minHeight: hL > 0 ? 3 : 0, transition: 'height 0.3s' }} />
-              </div>
-            )
-          })}
+
+        {/* Graphique avec échelle Y */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {/* Axe Y */}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', height: 90, paddingBottom: 0, flexShrink: 0 }}>
+            <span style={{ fontSize: 9, color: 'var(--text-sub)' }}>{(yMax / 1000).toFixed(0)}k</span>
+            <span style={{ fontSize: 9, color: 'var(--text-sub)' }}>{(yMid / 1000).toFixed(0)}k</span>
+            <span style={{ fontSize: 9, color: 'var(--text-sub)' }}>0</span>
+          </div>
+
+          {/* Barres */}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 90, borderLeft: '1px solid #eee', paddingLeft: 4 }}>
+              {MOIS.map((m, i) => {
+                const hB = Math.round((allTotauxBaptiste[i] / maxVal) * 80)
+                const hL = Math.round((allTotauxLucile[i] / maxVal) * 80)
+                const isSelected = m === mois
+                return (
+                  <div key={m} onClick={() => setMois(m)} style={{ flex: 1, display: 'flex', gap: 1, alignItems: 'flex-end', cursor: 'pointer', opacity: isSelected ? 1 : 0.55 }}>
+                    <div style={{ flex: 1, height: hB, background: 'var(--baptiste)', borderRadius: '2px 2px 0 0', minHeight: hB > 0 ? 3 : 0 }} />
+                    <div style={{ flex: 1, height: hL, background: 'var(--lucile)', borderRadius: '2px 2px 0 0', minHeight: hL > 0 ? 3 : 0 }} />
+                  </div>
+                )
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: 3, marginTop: 4, paddingLeft: 4 }}>
+              {moisShort.map((m, i) => (
+                <div key={m} onClick={() => setMois(MOIS[i])} style={{ flex: 1, textAlign: 'center', fontSize: 8, color: MOIS[i] === mois ? 'var(--green)' : 'var(--text-sub)', fontWeight: MOIS[i] === mois ? 700 : 400, cursor: 'pointer' }}>{m}</div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-          {moisShort.map((m, i) => (
-            <div key={m} onClick={() => setMois(MOIS[i])} style={{ flex: 1, textAlign: 'center', fontSize: 9, color: MOIS[i] === mois ? 'var(--green)' : 'var(--text-sub)', fontWeight: MOIS[i] === mois ? 700 : 400, cursor: 'pointer' }}>{m}</div>
-          ))}
-        </div>
+      </div>
+
+      {/* TOTAL ANNUEL */}
+      <div style={{ background: 'white', borderRadius: 14, margin: '0 20px 12px', padding: '16px 18px' }}>
+        <div style={{ fontSize: 13, color: 'var(--text-sub)', marginBottom: 4 }}>Total revenus 2026</div>
+        <div style={{ fontSize: 24, fontWeight: 700 }}>{totalAnnuel.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</div>
       </div>
 
       {/* HISTORIQUE */}
@@ -175,7 +215,7 @@ export default function Revenus({ data, setData }: any) {
         <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 15, fontWeight: 700 }}>Historique 2026</div>
         </div>
-        {MOIS.map((m, i) => {
+        {MOIS.map(m => {
           const rv = data.revenus[m]
           const tB = getTotalBaptiste(rv)
           const tL = getTotalLucile(rv)
@@ -199,12 +239,6 @@ export default function Revenus({ data, setData }: any) {
             </div>
           )
         })}
-      </div>
-
-      {/* TOTAL ANNUEL */}
-      <div style={{ background: 'white', borderRadius: 14, margin: '0 20px 12px', padding: '16px 18px' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-sub)', marginBottom: 4 }}>Total revenus 2026</div>
-        <div style={{ fontSize: 24, fontWeight: 700 }}>{totalAnnuel.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</div>
       </div>
 
       {/* FORM EDIT */}
