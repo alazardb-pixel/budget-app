@@ -39,7 +39,7 @@ export default function Transactions({ data, setData }: any) {
 
   async function save() {
     if (editing) {
-      const updated = appData.transactions.map((t: any) =>
+      const updated = data.transactions.map((t: any) =>
         t.id === editing.id ? { ...t, ...form, montant: parseFloat(form.montant as any) || 0 } : t
       )
       setData((d: any) => ({ ...d, transactions: updated }))
