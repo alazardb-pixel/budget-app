@@ -27,8 +27,14 @@ export async function saveCategories(categories: any[]) {
 }
 
 export async function saveRevenus(revenus: any) {
-  const values = Object.entries(revenus).map(([mois, v]: any) => [
-    mois, v.baptiste, v.lucile
+  const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+  const values = MOIS.map(m => [
+    m,
+    revenus[m]?.salaireBaptiste || 0,
+    revenus[m]?.ticketRestaurant || 0,
+    revenus[m]?.autresBaptiste || 0,
+    revenus[m]?.salaireLucile || 0,
+    revenus[m]?.autresLucile || 0,
   ])
   await fetch('/api/sheets', {
     method: 'POST',

@@ -13,7 +13,6 @@ function getAuth() {
   })
 }
 
-// LIRE toutes les données
 export async function GET() {
   try {
     const auth = getAuth()
@@ -22,7 +21,7 @@ export async function GET() {
     const [tx, cats, rev, ep] = await Promise.all([
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Transactions!A2:G' }),
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Catégories!A2:D' }),
-      sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Revenus!A2:D' }),
+      sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Revenus!A2:F' }),
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Epargnes!A2:C' }),
     ])
 
@@ -46,9 +45,18 @@ export async function GET() {
 
     const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
     const revenus: any = {}
-    MOIS.forEach(m => revenus[m] = { baptiste: 0, lucile: 0 })
+    MOIS.forEach(m => revenus[m] = {
+      salaireBaptiste: 0, ticketRestaurant: 0, autresBaptiste: 0,
+      salaireLucile: 0, autresLucile: 0
+    })
     ;(rev.data.values || []).forEach(r => {
-      if (r[0]) revenus[r[0]] = { baptiste: parseFloat(r[1]?.replace(',', '.')) || 0, lucile: parseFloat(r[2]?.replace(',', '.')) || 0 }
+      if (r[0]) revenus[r[0]] = {
+        salaireBaptiste: parseFloat(r[1]?.replace(',', '.')) || 0,
+        ticketRestaurant: parseFloat(r[2]?.replace(',', '.')) || 0,
+        autresBaptiste: parseFloat(r[3]?.replace(',', '.')) || 0,
+        salaireLucile: parseFloat(r[4]?.replace(',', '.')) || 0,
+        autresLucile: parseFloat(r[5]?.replace(',', '.')) || 0,
+      }
     })
 
     const epargnes = (ep.data.values || []).map((r, i) => ({
@@ -64,7 +72,6 @@ export async function GET() {
   }
 }
 
-// ÉCRIRE toutes les données
 export async function POST(req: Request) {
   try {
     const { sheet, values } = await req.json()
@@ -74,7 +81,7 @@ export async function POST(req: Request) {
     const ranges: any = {
       Transactions: 'Transactions!A2:G',
       Catégories: 'Catégories!A2:D',
-      Revenus: 'Revenus!A2:D',
+      Revenus: 'Revenus!A2:F',
       Epargnes: 'Epargnes!A2:C',
     }
 
