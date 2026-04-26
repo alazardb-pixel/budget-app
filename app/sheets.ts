@@ -17,12 +17,26 @@ export async function saveTransactions(transactions: any[]) {
 
 export async function saveCategories(categories: any[]) {
   const values = categories.map(c => [
-    c.icone, c.nom, c.budget, c.type
+    c.icone, c.nom, c.type, c.pour
   ])
   await fetch('/api/sheets', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sheet: 'Catégories', values })
+  })
+}
+
+export async function saveBudgets(budgets: any) {
+  const values: any[] = []
+  Object.entries(budgets).forEach(([mois, cats]: any) => {
+    Object.entries(cats).forEach(([cat, vals]: any) => {
+      values.push([mois, cat, vals.baptiste || 0, vals.lucile || 0])
+    })
+  })
+  await fetch('/api/sheets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sheet: 'Budgets', values })
   })
 }
 

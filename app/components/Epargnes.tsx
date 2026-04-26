@@ -7,6 +7,12 @@ export default function Epargnes({ data, setData }: any) {
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [form, setForm] = useState({ nom: '', objectif: '', epargne: '' })
+  const [toast, setToast] = useState('')
+
+function showToast(msg: string) {
+  setToast(msg)
+  setTimeout(() => setToast(''), 3000)
+}
 
   function openAdd() {
     setEditing(null)
@@ -32,6 +38,9 @@ export default function Epargnes({ data, setData }: any) {
       )
       setData((d: any) => ({ ...d, epargnes: updated }))
       await saveEpargnes(updated)
+      showToast('✅ Épargne enregistrée !')
+// ou
+showToast('🗑️ Épargne supprimée !')
     } else {
       const updated = [...data.epargnes, {
         id: Date.now(),
@@ -41,6 +50,9 @@ export default function Epargnes({ data, setData }: any) {
       }]
       setData((d: any) => ({ ...d, epargnes: updated }))
       await saveEpargnes(updated)
+      showToast('✅ Épargne enregistrée !')
+// ou
+showToast('🗑️ Épargne supprimée !')
     }
     setShowAdd(false)
   }
@@ -49,6 +61,9 @@ export default function Epargnes({ data, setData }: any) {
     const updated = data.epargnes.filter((e: any) => e.id !== id)
     setData((d: any) => ({ ...d, epargnes: updated }))
     await saveEpargnes(updated)
+    showToast('✅ Épargne enregistrée !')
+// ou
+showToast('🗑️ Épargne supprimée !')
   }
 
   return (
@@ -60,6 +75,15 @@ export default function Epargnes({ data, setData }: any) {
           + Add
         </button>
       </div>
+      {toast && (
+  <div style={{
+    position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
+    background: '#1a1a1a', color: 'white', padding: '12px 20px', borderRadius: 12,
+    fontSize: 14, fontWeight: 500, zIndex: 999, whiteSpace: 'nowrap',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.2)', animation: 'fadeIn 0.2s ease',
+  }}>{toast}</div>
+)}
+<style>{`@keyframes fadeIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`}</style>
 
       {/* LIST */}
       <div style={{ padding:'0 20px' }}>
