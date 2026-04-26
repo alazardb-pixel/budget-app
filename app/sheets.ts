@@ -57,13 +57,30 @@ export async function saveRevenus(revenus: any) {
   })
 }
 
-export async function saveEpargnes(epargnes: any[]) {
-  const values = epargnes.map(e => [
-    e.nom, e.objectif, e.epargne
-  ])
+export async function saveEpargnesBaptiste(epargnesBaptiste: any) {
+  const values: any[] = []
+  Object.entries(epargnesBaptiste).forEach(([mois, enveloppes]: any) => {
+    Object.entries(enveloppes).forEach(([enveloppe, vals]: any) => {
+      values.push([mois, enveloppe, vals.versement || 0, vals.retrait || 0, vals.valorisation || 0])
+    })
+  })
   await fetch('/api/sheets', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sheet: 'Epargnes', values })
+    body: JSON.stringify({ sheet: 'Epargnes_Baptiste', values })
+  })
+}
+
+export async function saveEpargneConfig(config: any) {
+  const values: any[] = []
+  Object.entries(config).forEach(([personne, enveloppes]: any) => {
+    Object.entries(enveloppes).forEach(([enveloppe, objectif]: any) => {
+      values.push([personne, enveloppe, objectif])
+    })
+  })
+  await fetch('/api/sheets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sheet: 'Epargnes_Config', values })
   })
 }

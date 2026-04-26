@@ -18,12 +18,13 @@ export async function GET() {
     const auth = getAuth()
     const sheets = google.sheets({ version: 'v4', auth })
 
-    const [tx, cats, rev, ep, budgets] = await Promise.all([
+    const [tx, cats, rev, budgets, epBaptiste, epConfig] = await Promise.all([
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Transactions!A2:G' }),
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Catégories!A2:D' }),
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Revenus!A2:F' }),
-      sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Epargnes!A2:C' }),
       sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Budgets!A2:D' }),
+      sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Epargnes_Baptiste!A2:E' }),
+      sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'Epargnes_Config!A2:C' }),
     ])
 
     const transactions = (tx.data.values || []).map((r, i) => ({
@@ -59,14 +60,6 @@ export async function GET() {
       }
     })
 
-    const epargnes = (ep.data.values || []).map((r, i) => ({
-      id: i + 1,
-      nom: r[0] || '',
-      objectif: parseFloat(r[1]?.replace(',', '.')) || 0,
-      epargne: parseFloat(r[2]?.replace(',', '.')) || 0,
-    }))
-
-    // budgets: { 'Janvier': { 'Alimentation': { baptiste: 300, lucile: 200 } } }
     const budgetsData: any = {}
     ;(budgets.data.values || []).forEach(r => {
       const [mois, cat, baptiste, lucile] = r
@@ -78,7 +71,40 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ transactions, categories, revenus, epargnes, budgets: budgetsData })
+    // Config enveloppes : { baptiste: { 'Livret A': 8000, ... } }
+    const epargneConfig: any = { baptiste: {}, lucile: {} }
+    ;(epConfig.data.values || []).forEach(r => {
+      const [personne, enveloppe, objectif] = r
+      if (!personne || !enveloppe) return
+      const key = personne.toLowerCase()
+      epargneConfig[key][enveloppe] = parseFloat(objectif?.replace(',', '.')) || 0
+    })
+
+    // Si config vide, mettre defaults Baptiste
+    if (Object.keys(epargneConfig.baptiste).length === 0) {
+      epargneConfig.baptiste = {
+        'Livret A': 8000, 'AV': 1200, 'PEE': 300,
+        'PEA': 23000, 'CTO': 1000, 'Crypto': 1000
+      }
+    }
+
+    // Données épargne Baptiste : { 'Janvier': { 'Livret A': { versement, retrait, valorisation } } }
+    const epargnesBaptiste: any = {}
+    ;(epBaptiste.data.values || []).forEach(r => {
+      const [mois, enveloppe, versement, retrait, valorisation] = r
+      if (!mois || !enveloppe) return
+      if (!epargnesBaptiste[mois]) epargnesBaptiste[mois] = {}
+      epargnesBaptiste[mois][enveloppe] = {
+        versement: parseFloat(versement?.replace(',', '.')) || 0,
+        retrait: parseFloat(retrait?.replace(',', '.')) || 0,
+        valorisation: parseFloat(valorisation?.replace(',', '.')) || 0,
+      }
+    })
+
+    return NextResponse.json({
+      transactions, categories, revenus, budgets: budgetsData,
+      epargnesBaptiste, epargneConfig,
+    })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
@@ -94,8 +120,9 @@ export async function POST(req: Request) {
       Transactions: 'Transactions!A2:G',
       Catégories: 'Catégories!A2:D',
       Revenus: 'Revenus!A2:F',
-      Epargnes: 'Epargnes!A2:C',
       Budgets: 'Budgets!A2:D',
+      Epargnes_Baptiste: 'Epargnes_Baptiste!A2:E',
+      Epargnes_Config: 'Epargnes_Config!A2:C',
     }
 
     await sheets.spreadsheets.values.clear({ spreadsheetId: SHEET_ID, range: ranges[sheet] })
