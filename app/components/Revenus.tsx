@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { MOIS } from '../data'
 import { saveRevenus } from '../sheets'
 
-export default function Revenus({ data, setData }: any) {
+export default function Revenus({ data, setData, onMenuOpen }: any) {
   const [mois, setMois] = useState('Janvier')
   const [showEdit, setShowEdit] = useState(false)
   const [toast, setToast] = useState('')
@@ -98,7 +98,7 @@ export default function Revenus({ data, setData }: any) {
 
       {/* HEADER */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 12px' }}>
-        <span style={{ fontSize: 22, color: 'var(--text-sub)' }}>☰</span>
+        <button onClick={onMenuOpen} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'var(--text-sub)', padding:0 }}>☰</button>
         <span style={{ fontSize: 16, fontWeight: 700 }}>Revenus</span>
         <span style={{ fontSize: 22, color: 'var(--text-sub)' }}></span>
       </div>

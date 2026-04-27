@@ -11,7 +11,7 @@ import { loadData } from './sheets'
 import { data as defaultData } from './data'
 
 const APPS = [
-  { id: 'budget', icon: '🏠', label: 'Budget' },
+  { id: 'budget', icon: '🏠', label: 'Budget du foyer' },
   { id: 'epargnes', icon: '💰', label: 'Épargnes' },
   { id: 'repas', icon: '🍽️', label: 'Repas' },
   { id: 'calendrier', icon: '📅', label: 'Calendrier' },
@@ -28,6 +28,7 @@ export default function Home() {
   const [tab, setTab] = useState('transactions')
   const [appData, setAppData] = useState(defaultData)
   const [loading, setLoading] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '')
@@ -49,6 +50,11 @@ export default function Home() {
       .finally(() => setLoading(false))
   }, [])
 
+  function switchApp(id: string) {
+    setApp(id)
+    setDrawerOpen(false)
+  }
+
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', flexDirection:'column', gap:16 }}>
       <div style={{ fontSize:40 }}>🏠</div>
@@ -56,42 +62,64 @@ export default function Home() {
     </div>
   )
 
-  return (
-    <div style={{ maxWidth:430, margin:'0 auto', minHeight:'100vh', background:'var(--bg)', display:'flex', flexDirection:'column' }}>
+  const currentApp = APPS.find(a => a.id === app)
 
-      {/* TOP NAV — APPS */}
-      <div style={{
-        background:'white', borderBottom:'1px solid var(--border)',
-        display:'flex', padding:'12px 20px 0', gap:0,
-        position:'sticky', top:0, zIndex:40,
-      }}>
-        {APPS.map(a => (
-          <button key={a.id} onClick={() => setApp(a.id)} style={{
-            flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-            padding:'6px 0 10px', border:'none', background:'none', cursor:'pointer',
-            fontFamily:'DM Sans, sans-serif', fontSize:10, fontWeight:600,
-            color: app === a.id ? 'var(--green)' : 'var(--text-sub)',
-            borderBottom: app === a.id ? '2px solid var(--green)' : '2px solid transparent',
-            transition:'all 0.2s',
+  return (
+    <div style={{ maxWidth:430, margin:'0 auto', minHeight:'100vh', background:'var(--bg)', display:'flex', flexDirection:'column', position:'relative' }}>
+
+      {/* DRAWER OVERLAY */}
+      {drawerOpen && (
+        <div style={{ position:'fixed', inset:0, zIndex:200 }} onClick={() => setDrawerOpen(false)}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.4)' }} />
+          <div onClick={e => e.stopPropagation()} style={{
+            position:'absolute', left:0, top:0, bottom:0, width:280,
+            background:'white', display:'flex', flexDirection:'column',
+            animation:'slideRight 0.25s ease',
           }}>
-            <span style={{ fontSize:20 }}>{a.icon}</span>
-            {a.label}
-          </button>
-        ))}
-      </div>
+            <style>{`@keyframes slideRight { from{transform:translateX(-100%)}to{transform:translateX(0)} }`}</style>
+
+            {/* DRAWER HEADER */}
+            <div style={{ padding:'56px 24px 24px', borderBottom:'1px solid var(--border)' }}>
+              <div style={{ fontSize:22, fontWeight:700 }}>Menu</div>
+            </div>
+
+            {/* APPS LIST */}
+            <div style={{ flex:1, padding:'12px 0' }}>
+              {APPS.map(a => (
+                <button key={a.id} onClick={() => switchApp(a.id)} style={{
+                  width:'100%', display:'flex', alignItems:'center', gap:16,
+                  padding:'16px 24px', border:'none', background: app === a.id ? 'var(--green-bg)' : 'none',
+                  cursor:'pointer', fontFamily:'DM Sans, sans-serif', textAlign:'left',
+                  borderLeft: app === a.id ? '3px solid var(--green)' : '3px solid transparent',
+                }}>
+                  <span style={{ fontSize:24 }}>{a.icon}</span>
+                  <span style={{ fontSize:15, fontWeight: app === a.id ? 700 : 500, color: app === a.id ? 'var(--green)' : 'var(--text)' }}>
+                    {a.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* DRAWER FOOTER */}
+            <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', fontSize:12, color:'var(--text-sub)' }}>
+              Baptiste & Lucile · 2026
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CONTENU */}
       <div style={{ flex:1, overflowY:'auto', paddingBottom: app === 'budget' ? 70 : 20 }}>
         {app === 'budget' && (
           <>
-            {tab === 'transactions' && <Transactions data={appData} setData={setAppData} />}
-            {tab === 'categories' && <Categories data={appData} setData={setAppData} />}
-            {tab === 'revenus' && <Revenus data={appData} setData={setAppData} />}
+            {tab === 'transactions' && <Transactions data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
+            {tab === 'categories' && <Categories data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
+            {tab === 'revenus' && <Revenus data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
           </>
         )}
-        {app === 'epargnes' && <Epargnes data={appData} setData={setAppData} />}
-        {app === 'repas' && <Repas />}
-        {app === 'calendrier' && <Calendrier />}
+        {app === 'epargnes' && <Epargnes data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
+        {app === 'repas' && <Repas onMenuOpen={() => setDrawerOpen(true)} />}
+        {app === 'calendrier' && <Calendrier onMenuOpen={() => setDrawerOpen(true)} />}
       </div>
 
       {/* BOTTOM NAV — seulement pour Budget */}

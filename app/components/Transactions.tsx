@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { MOIS } from '../data'
 import { saveTransactions } from '../sheets'
 
-export default function Transactions({ data, setData }: any) {
+export default function Transactions({ data, setData, onMenuOpen }: any) {
   const [search, setSearch] = useState('')
   const [showAdd, setShowAdd] = useState(false)
   const [detail, setDetail] = useState<any>(null)
@@ -117,7 +117,7 @@ export default function Transactions({ data, setData }: any) {
 
       {/* HEADER */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 8px' }}>
-        <span style={{ fontSize: 22, color: 'var(--text-sub)' }}>☰</span>
+        <button onClick={onMenuOpen} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'var(--text-sub)', padding:0 }}>☰</button>
         <button onClick={openAdd} style={{ background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 20, padding: '9px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
           + Add
         </button>

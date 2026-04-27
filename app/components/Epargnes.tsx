@@ -6,7 +6,7 @@ import { saveEpargnesBaptiste, saveEpargneConfig } from '../sheets'
 
 const COLORS = ['#4a7c3f','#c95b8a','#f59e0b','#3b82f6','#8b5cf6','#ef4444','#06b6d4','#84cc16']
 
-export default function Epargnes({ data, setData }: any) {
+export default function Epargnes({ data, setData, onMenuOpen }: any) {
   const [mois, setMois] = useState('Janvier')
   const [toast, setToast] = useState('')
   const [showSaisie, setShowSaisie] = useState(false)
