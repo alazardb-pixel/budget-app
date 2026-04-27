@@ -60,10 +60,7 @@ export default function Categories({ data, setData }: any) {
   function openBudget(c: any) {
     setShowBudget(c)
     const b = data.budgets?.[mois]?.[c.nom]
-    setBudgetForm({
-      baptiste: b?.baptiste || '',
-      lucile: b?.lucile || '',
-    })
+    setBudgetForm({ baptiste: b?.baptiste || '', lucile: b?.lucile || '' })
     setDetail(null)
   }
 
@@ -112,12 +109,10 @@ export default function Categories({ data, setData }: any) {
     const budget = getBudget(c)
     const pct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0
     const over = budget > 0 && spent > budget
-
     return (
       <div onClick={() => setDetail(c)} style={{
         display: 'flex', alignItems: 'center', padding: '12px 16px',
-        borderBottom: '1px solid var(--border)', cursor: 'pointer',
-        background: 'white',
+        borderBottom: '1px solid var(--border)', cursor: 'pointer', background: 'white',
       }}>
         <div style={{ fontSize: 26, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>{c.icone}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -127,12 +122,11 @@ export default function Categories({ data, setData }: any) {
               {spent.toFixed(0)} €{budget > 0 ? ` / ${budget} €` : ''}
             </div>
           </div>
-          {budget > 0 && (
+          {budget > 0 ? (
             <div style={{ background: '#ebebeb', borderRadius: 4, height: 5, overflow: 'hidden' }}>
               <div style={{ width: `${pct}%`, height: '100%', borderRadius: 4, background: over ? '#e53935' : pct > 80 ? '#ff9800' : 'var(--green)', transition: 'width 0.4s' }} />
             </div>
-          )}
-          {budget === 0 && (
+          ) : (
             <div style={{ fontSize: 11, color: 'var(--text-sub)' }}>Aucun budget défini</div>
           )}
         </div>
@@ -142,7 +136,6 @@ export default function Categories({ data, setData }: any) {
 
   return (
     <div>
-      {/* TOAST */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
@@ -151,11 +144,10 @@ export default function Categories({ data, setData }: any) {
           boxShadow: '0 4px 20px rgba(0,0,0,0.2)', animation: 'fadeIn 0.2s ease',
         }}>{toast}</div>
       )}
-      <style>{`@keyframes fadeIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`}</style>
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}`}</style>
 
       {/* HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 12px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700 }}>Catégories</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '16px 20px 12px' }}>
         <button onClick={openAdd} style={{ background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 20, padding: '9px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>+ Add</button>
       </div>
 
@@ -181,25 +173,17 @@ export default function Categories({ data, setData }: any) {
 
       {/* FIXES */}
       {fixes.length > 0 && (
-        <div style={{ margin: '0 0 4px' }}>
-          <div style={{ padding: '8px 20px 6px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text-sub)' }}>
-            🔒 Charges fixes
-          </div>
-          <div style={{ background: 'white', margin: '0 0 2px' }}>
-            {fixes.map((c: any) => <CatCard key={c.id} c={c} />)}
-          </div>
+        <div style={{ marginBottom: 4 }}>
+          <div style={{ padding: '8px 20px 6px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text-sub)' }}>🔒 Charges fixes</div>
+          <div style={{ background: 'white' }}>{fixes.map((c: any) => <CatCard key={c.id} c={c} />)}</div>
         </div>
       )}
 
       {/* VARIABLES */}
       {variables.length > 0 && (
-        <div style={{ margin: '8px 0 4px' }}>
-          <div style={{ padding: '8px 20px 6px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text-sub)' }}>
-            📊 Charges variables
-          </div>
-          <div style={{ background: 'white', margin: '0 0 2px' }}>
-            {variables.map((c: any) => <CatCard key={c.id} c={c} />)}
-          </div>
+        <div style={{ marginBottom: 4 }}>
+          <div style={{ padding: '8px 20px 6px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text-sub)' }}>📊 Charges variables</div>
+          <div style={{ background: 'white' }}>{variables.map((c: any) => <CatCard key={c.id} c={c} />)}</div>
         </div>
       )}
 
@@ -214,26 +198,20 @@ export default function Categories({ data, setData }: any) {
             onClick={() => setDetail(null)}>
             <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 430, padding: '20px 20px 40px' }}>
               <div style={{ width: 36, height: 4, background: '#ddd', borderRadius: 2, margin: '0 auto 16px' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 700 }}>{detail.icone} {detail.nom}</div>
                   <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>{detail.type} · {detail.pour}</div>
                 </div>
                 <button onClick={() => openEdit(detail)} style={{ background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 20, padding: '8px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>✏️ Edit</button>
               </div>
-              <div style={{ background: '#f7f8f7', borderRadius: 14, marginTop: 16, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ color: 'var(--text-sub)', fontSize: 14 }}>Budget {mois}</span>
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>{budget > 0 ? `${budget} €` : 'Non défini'}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ color: 'var(--text-sub)', fontSize: 14 }}>Dépensé</span>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: over ? '#e53935' : 'var(--text)' }}>{spent.toFixed(2)} €</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px' }}>
-                  <span style={{ color: 'var(--text-sub)', fontSize: 14 }}>Reste</span>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: over ? '#e53935' : 'var(--green)' }}>{(budget - spent).toFixed(2)} €</span>
-                </div>
+              <div style={{ background: '#f7f8f7', borderRadius: 14, overflow: 'hidden' }}>
+                {[['Budget ' + mois, budget > 0 ? `${budget} €` : 'Non défini'], ['Dépensé', spent.toFixed(2) + ' €'], ['Reste', (budget - spent).toFixed(2) + ' €']].map(([k, v], i) => (
+                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+                    <span style={{ color: 'var(--text-sub)', fontSize: 14 }}>{k}</span>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: i === 2 ? (over ? '#e53935' : 'var(--green)') : 'var(--text)' }}>{v}</span>
+                  </div>
+                ))}
               </div>
               {budget > 0 && (
                 <div style={{ marginTop: 12 }}>
@@ -301,13 +279,12 @@ export default function Categories({ data, setData }: any) {
             <div style={{ width: 36, height: 4, background: '#ddd', borderRadius: 2, margin: '0 auto 16px' }} />
             <div style={{ textAlign: 'center', fontSize: 16, fontWeight: 700, marginBottom: 20 }}>{editing ? 'Modifier' : 'Ajouter une catégorie'}</div>
             {[
-              { label: 'Icône', key: 'icone', type: 'text', placeholder: '🏠' },
-              { label: 'Nom', key: 'nom', type: 'text', placeholder: 'Ex: Loyer' },
+              { label: 'Icône', key: 'icone', placeholder: '🏠' },
+              { label: 'Nom', key: 'nom', placeholder: 'Ex: Loyer' },
             ].map(f => (
               <div key={f.key} style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-sub)', marginBottom: 6 }}>{f.label}</div>
-                <input type={f.type} placeholder={f.placeholder} value={(form as any)[f.key]}
-                  onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                <input placeholder={f.placeholder} value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                   style={{ width: '100%', background: '#f2f2f2', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 15, fontFamily: 'DM Sans, sans-serif', outline: 'none' }} />
               </div>
             ))}

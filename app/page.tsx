@@ -28,15 +28,13 @@ export default function Home() {
   const [tab, setTab] = useState('transactions')
   const [appData, setAppData] = useState(defaultData)
   const [loading, setLoading] = useState(true)
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '')
     const [appHash, tabHash] = hash.split('/')
-    const validApps = APPS.map(a => a.id)
-    if (validApps.includes(appHash)) setApp(appHash)
-    const validTabs = BUDGET_TABS.map(t => t.id)
-    if (tabHash && validTabs.includes(tabHash)) setTab(tabHash)
+    if (APPS.find(a => a.id === appHash)) setApp(appHash)
+    if (tabHash && BUDGET_TABS.find(t => t.id === tabHash)) setTab(tabHash)
   }, [])
 
   useEffect(() => {
@@ -52,91 +50,96 @@ export default function Home() {
 
   function switchApp(id: string) {
     setApp(id)
-    setDrawerOpen(false)
+    setMenuOpen(false)
   }
 
   if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', flexDirection:'column', gap:16 }}>
-      <div style={{ fontSize:40 }}>🏠</div>
-      <div style={{ fontSize:16, color:'var(--text-sub)', fontFamily:'DM Sans, sans-serif' }}>Chargement...</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 40 }}>🏠</div>
+      <div style={{ fontSize: 16, color: 'var(--text-sub)', fontFamily: 'DM Sans, sans-serif' }}>Chargement...</div>
     </div>
   )
 
-  const currentApp = APPS.find(a => a.id === app)
-
   return (
-    <div style={{ maxWidth:430, margin:'0 auto', minHeight:'100vh', background:'var(--bg)', display:'flex', flexDirection:'column', position:'relative' }}>
+    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
-      {/* DRAWER OVERLAY */}
-      {drawerOpen && (
-        <div style={{ position:'fixed', inset:0, zIndex:200 }} onClick={() => setDrawerOpen(false)}>
-          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.4)' }} />
-          <div onClick={e => e.stopPropagation()} style={{
-            position:'absolute', left:0, top:0, bottom:0, width:280,
-            background:'white', display:'flex', flexDirection:'column',
-            animation:'slideRight 0.25s ease',
+      {/* MENU OVERLAY */}
+      {menuOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex' }}>
+          {/* Fond sombre */}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} onClick={() => setMenuOpen(false)} />
+          {/* Menu latéral */}
+          <div style={{
+            position: 'relative', width: 280, background: 'white', height: '100%',
+            zIndex: 101, display: 'flex', flexDirection: 'column',
+            boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
+            animation: 'slideRight 0.25s ease',
           }}>
-            <style>{`@keyframes slideRight { from{transform:translateX(-100%)}to{transform:translateX(0)} }`}</style>
-
-            {/* DRAWER HEADER */}
-            <div style={{ padding:'56px 24px 24px', borderBottom:'1px solid var(--border)' }}>
-              <div style={{ fontSize:22, fontWeight:700 }}>Menu</div>
+            <style>{`@keyframes slideRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>
+            <div style={{ padding: '48px 24px 24px', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 22, fontWeight: 700 }}>Menu</div>
             </div>
-
-            {/* APPS LIST */}
-            <div style={{ flex:1, padding:'12px 0' }}>
-              {APPS.map(a => (
-                <button key={a.id} onClick={() => switchApp(a.id)} style={{
-                  width:'100%', display:'flex', alignItems:'center', gap:16,
-                  padding:'16px 24px', border:'none', background: app === a.id ? 'var(--green-bg)' : 'none',
-                  cursor:'pointer', fontFamily:'DM Sans, sans-serif', textAlign:'left',
-                  borderLeft: app === a.id ? '3px solid var(--green)' : '3px solid transparent',
-                }}>
-                  <span style={{ fontSize:24 }}>{a.icon}</span>
-                  <span style={{ fontSize:15, fontWeight: app === a.id ? 700 : 500, color: app === a.id ? 'var(--green)' : 'var(--text)' }}>
-                    {a.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* DRAWER FOOTER */}
-            <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', fontSize:12, color:'var(--text-sub)' }}>
-              Baptiste & Lucile · 2026
-            </div>
+            {APPS.map(a => (
+              <button key={a.id} onClick={() => switchApp(a.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                padding: '18px 24px', border: 'none', background: app === a.id ? 'var(--green-bg)' : 'white',
+                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', textAlign: 'left',
+                borderLeft: app === a.id ? '3px solid var(--green)' : '3px solid transparent',
+              }}>
+                <span style={{ fontSize: 24 }}>{a.icon}</span>
+                <span style={{ fontSize: 16, fontWeight: app === a.id ? 700 : 500, color: app === a.id ? 'var(--green)' : 'var(--text)' }}>
+                  {a.label}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* CONTENU */}
-      <div style={{ flex:1, overflowY:'auto', paddingBottom: app === 'budget' ? 70 : 20 }}>
-        {app === 'budget' && (
-          <>
-            {tab === 'transactions' && <Transactions data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
-            {tab === 'categories' && <Categories data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
-            {tab === 'revenus' && <Revenus data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
-          </>
-        )}
-        {app === 'epargnes' && <Epargnes data={appData} setData={setAppData} onMenuOpen={() => setDrawerOpen(true)} />}
-        {app === 'repas' && <Repas onMenuOpen={() => setDrawerOpen(true)} />}
-        {app === 'calendrier' && <Calendrier onMenuOpen={() => setDrawerOpen(true)} />}
+      {/* TOP BAR */}
+      <div style={{
+        background: 'white', borderBottom: '1px solid var(--border)',
+        padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        position: 'sticky', top: 0, zIndex: 40,
+      }}>
+        <button onClick={() => setMenuOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 22, padding: 0, color: 'var(--text)' }}>
+          ☰
+        </button>
+        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
+          {APPS.find(a => a.id === app)?.icon} {APPS.find(a => a.id === app)?.label}
+        </span>
+        <span style={{ width: 28 }} />
       </div>
 
-      {/* BOTTOM NAV — seulement pour Budget */}
+      {/* CONTENU */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: app === 'budget' ? 70 : 20 }}>
+        {app === 'budget' && (
+          <>
+            {tab === 'transactions' && <Transactions data={appData} setData={setAppData} />}
+            {tab === 'categories' && <Categories data={appData} setData={setAppData} />}
+            {tab === 'revenus' && <Revenus data={appData} setData={setAppData} />}
+          </>
+        )}
+        {app === 'epargnes' && <Epargnes data={appData} setData={setAppData} />}
+        {app === 'repas' && <Repas />}
+        {app === 'calendrier' && <Calendrier />}
+      </div>
+
+      {/* BOTTOM NAV — seulement Budget */}
       {app === 'budget' && (
         <div style={{
-          position:'fixed', bottom:0, left:'50%', transform:'translateX(-50%)',
-          width:'100%', maxWidth:430, display:'flex', background:'white',
-          borderTop:'1px solid var(--border)', paddingBottom:16, zIndex:50,
+          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '100%', maxWidth: 430, display: 'flex', background: 'white',
+          borderTop: '1px solid var(--border)', paddingBottom: 16, zIndex: 50,
         }}>
           {BUDGET_TABS.map(item => (
             <button key={item.id} onClick={() => setTab(item.id)} style={{
-              flex:1, display:'flex', flexDirection:'column', alignItems:'center',
-              gap:3, padding:'10px 0 0', border:'none', background:'none', cursor:'pointer',
-              fontSize:11, fontWeight:500, fontFamily:'DM Sans, sans-serif',
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+              gap: 3, padding: '10px 0 0', border: 'none', background: 'none', cursor: 'pointer',
+              fontSize: 11, fontWeight: 500, fontFamily: 'DM Sans, sans-serif',
               color: tab === item.id ? 'var(--green)' : 'var(--text-sub)',
             }}>
-              <span style={{ fontSize:22 }}>{item.icon}</span>
+              <span style={{ fontSize: 22 }}>{item.icon}</span>
               {item.label}
             </button>
           ))}

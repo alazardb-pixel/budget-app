@@ -1,19 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { MOIS } from '../data'
 import { saveTransactions } from '../sheets'
 
-export default function Transactions({ data, setData, onMenuOpen }: any) {
+export default function Transactions({ data, setData }: any) {
   const [search, setSearch] = useState('')
   const [showAdd, setShowAdd] = useState(false)
   const [detail, setDetail] = useState<any>(null)
   const [editing, setEditing] = useState<any>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [toast, setToast] = useState('')
-  const [filters, setFilters] = useState({
-    mois: '', payepar: '', pour: '', cat: ''
-  })
+  const [filters, setFilters] = useState({ mois: '', payepar: '', pour: '', cat: '' })
   const [form, setForm] = useState({
     mois: 'Janvier', cat: '', libelle: '', montant: '', pour: 'Commun', payepar: 'Baptiste'
   })
@@ -24,8 +22,7 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
   }
 
   const filtered = data.transactions.filter((t: any) => {
-    const matchSearch = t.libelle.toLowerCase().includes(search.toLowerCase()) ||
-      t.cat.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = t.libelle.toLowerCase().includes(search.toLowerCase()) || t.cat.toLowerCase().includes(search.toLowerCase())
     const matchMois = !filters.mois || t.mois === filters.mois
     const matchPayepar = !filters.payepar || t.payepar === filters.payepar
     const matchPour = !filters.pour || t.pour === filters.pour
@@ -40,6 +37,7 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
   }, {})
 
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length
+  const uniqueCats = [...new Set(data.transactions.map((t: any) => t.cat))] as string[]
 
   function resetFilters() {
     setFilters({ mois: '', payepar: '', pour: '', cat: '' })
@@ -76,7 +74,7 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
     setData((d: any) => ({ ...d, transactions: updated }))
     setShowAdd(false)
     await saveTransactions(updated)
-    showToast('✅ Transaction enregistrée dans Google Sheets !')
+    showToast('✅ Transaction enregistrée !')
   }
 
   async function del(id: number) {
@@ -88,36 +86,23 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
   }
 
   const whoColor: any = {
-    baptiste: 'var(--baptiste)',
-    lucile: 'var(--lucile)',
-    commun: 'var(--commun)'
+    baptiste: 'var(--baptiste)', lucile: 'var(--lucile)', commun: 'var(--commun)'
   }
-
-  const uniqueCats = [...new Set(data.transactions.map((t: any) => t.cat))] as string[]
 
   return (
     <div>
-
-      {/* TOAST */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
           background: '#1a1a1a', color: 'white', padding: '12px 20px', borderRadius: 12,
           fontSize: 14, fontWeight: 500, zIndex: 999, whiteSpace: 'nowrap',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-          animation: 'fadeIn 0.2s ease',
-        }}>
-          {toast}
-        </div>
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2)', animation: 'fadeIn 0.2s ease',
+        }}>{toast}</div>
       )}
-
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-      `}</style>
+      <style>{`@keyframes fadeIn { from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);} }`}</style>
 
       {/* HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 8px' }}>
-        <button onClick={onMenuOpen} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'var(--text-sub)', padding:0 }}>☰</button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '16px 20px 8px' }}>
         <button onClick={openAdd} style={{ background: 'var(--green-btn)', color: 'white', border: 'none', borderRadius: 20, padding: '9px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
           + Add
         </button>
@@ -125,16 +110,12 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
 
       {/* SEARCH + FILTER */}
       <div style={{ padding: '0 20px 12px', display: 'flex', gap: 8 }}>
-        <input
-          value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Recherche"
-          style={{ flex: 1, background: '#ebebeb', border: 'none', borderRadius: 12, padding: '10px 14px', fontSize: 14, fontFamily: 'DM Sans, sans-serif', outline: 'none' }}
-        />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Recherche"
+          style={{ flex: 1, background: '#ebebeb', border: 'none', borderRadius: 12, padding: '10px 14px', fontSize: 14, fontFamily: 'DM Sans, sans-serif', outline: 'none' }} />
         <button onClick={() => setShowFilters(!showFilters)} style={{
           background: activeFiltersCount > 0 ? 'var(--green-btn)' : '#ebebeb',
           border: 'none', borderRadius: 12, width: 42, cursor: 'pointer', fontSize: 16,
-          color: activeFiltersCount > 0 ? 'white' : 'var(--text-sub)',
-          position: 'relative', fontWeight: 600,
+          color: activeFiltersCount > 0 ? 'white' : 'var(--text-sub)', fontWeight: 600,
         }}>
           {activeFiltersCount > 0 ? activeFiltersCount : '⚙'}
         </button>
@@ -151,7 +132,6 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
               </button>
             )}
           </div>
-
           {[
             { label: 'Mois', key: 'mois', options: ['', ...MOIS] },
             { label: 'Pour', key: 'pour', options: ['', 'Baptiste', 'Lucile', 'Commun'] },
@@ -160,19 +140,15 @@ export default function Transactions({ data, setData, onMenuOpen }: any) {
           ].map(f => (
             <div key={f.key} style={{ marginBottom: 10 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-sub)', marginBottom: 4 }}>{f.label}</div>
-              <select
-                value={(filters as any)[f.key]}
-                onChange={e => setFilters(p => ({ ...p, [f.key]: e.target.value }))}
-                style={{ width: '100%', background: '#f2f2f2', border: 'none', borderRadius: 10, padding: '10px 12px', fontSize: 14, fontFamily: 'DM Sans, sans-serif', outline: 'none' }}
-              >
-                {f.options.map(o => <option key={o} value={o}>{o === '' ? `Tous` : o}</option>)}
+              <select value={(filters as any)[f.key]} onChange={e => setFilters(p => ({ ...p, [f.key]: e.target.value }))}
+                style={{ width: '100%', background: '#f2f2f2', border: 'none', borderRadius: 10, padding: '10px 12px', fontSize: 14, fontFamily: 'DM Sans, sans-serif', outline: 'none' }}>
+                {f.options.map(o => <option key={o} value={o}>{o === '' ? 'Tous' : o}</option>)}
               </select>
             </div>
           ))}
         </div>
       )}
 
-      {/* RÉSULTAT FILTRE */}
       {activeFiltersCount > 0 && (
         <div style={{ padding: '0 20px 8px', fontSize: 13, color: 'var(--text-sub)' }}>
           {filtered.length} transaction{filtered.length > 1 ? 's' : ''} trouvée{filtered.length > 1 ? 's' : ''}
